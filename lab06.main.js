@@ -103,7 +103,7 @@ class ServiceNowAdapter extends EventEmitter {
  * @param {ServiceNowAdapter~requestCallback} [callback] - The optional callback
  *   that handles the response.
  */
-healthcheck(callback) {
+healthcheck(cb) {
  this.getRecord((result, error) => {
    /**
     * For this lab, complete the if else conditional
@@ -111,10 +111,7 @@ healthcheck(callback) {
     * or the instance was hibernating. You must write
     * the blocks for each branch.
     */
-    let callbackData = null;
-    let callbackError = null;
    if (error) {
-       callbackError=error;
      /**
       * Write this block.
       * If an error was returned, we need to emit OFFLINE.
@@ -129,14 +126,15 @@ healthcheck(callback) {
       */
       this.emitOffline();
       log.error(this.id+": "+error);
-      callback(callbackData, callbackError)
+      if(cb)
+        cb(result, error);
 
       
    } else {
-       callbackData=result;
        this.emitOnline();
        log.debug("ServiceNow Adapter, ID: "+this.id+ " Online")
-       callback(callbackData, callbackError)
+       if(cb)
+        cb(result, error);
      /**
       * Write this block.
       * If no runtime problems were detected, emit ONLINE.
@@ -204,24 +202,7 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * get() takes a callback function.
      */
-     let data = this.connector.get(callback);
-     if(Object.prototype.hasOwnProperty(data, 'body')){
-         let obj = JSON.parse(data.body);
-         let arr = obj.result;
-         let arr2=[];
-         arr.forEach(e=>{
-             arr2.push({
-                 changeTicketNumber : e.number,
-                 active: e.active,
-                 priority: e.priority,
-                 description: e.description,
-                 work_start: e.work_start,
-                 work_end: e.work_end,
-                 change_ticket_key: e.sys_id
-                 })
-         })
-         return arr2;
-     }
+     this.connector.get(callback);
   }
 
   /**
@@ -240,24 +221,7 @@ healthcheck(callback) {
      * Note how the object was instantiated in the constructor().
      * post() takes a callback function.
      */
-     let data = this.connector.post(callback);
-     if(Object.prototype.hasOwnProperty(data, 'body')){
-         let obj = JSON.parse(data.body);
-         let arr = obj.result;
-         let arr2=[];
-         arr.forEach(e=>{
-             arr2.push({
-                 changeTicketNumber : e.number,
-                 active: e.active,
-                 priority: e.priority,
-                 description: e.description,
-                 work_start: e.work_start,
-                 work_end: e.work_end,
-                 change_ticket_key: e.sys_id
-                 })
-         })
-         return arr2;
-     }
+     this.connector.post(callback);
   }
 }
 
